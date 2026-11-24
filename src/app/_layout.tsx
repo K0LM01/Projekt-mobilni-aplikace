@@ -1,5 +1,12 @@
-import * as SplashScreen from "expo-splash-screen";
+import { Stack } from "expo-router";
+import { SolarProvider } from "../../context/SolarContext";
 
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {}
+export default function RootLayout() {
+  return (
+    <SolarProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+    </SolarProvider>
+  );
+}

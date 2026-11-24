@@ -71,6 +71,13 @@ export function SolarProvider({ children }: { children: React.ReactNode }) {
       console.error("Chyba pri ukládání historie:", error);
     }
   };
+  return (
+    <SolarContext.Provider
+      value={{ panelParams, setPanelParams, history, addToHistory }}
+    >
+      {children}
+    </SolarContext.Provider>
+  );
 }
 
 export function useSolar() {
