@@ -1,11 +1,12 @@
 import { useState } from "react";
 import {
   Alert,
+  Keyboard,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
-  View,
+  TouchableOpacity
 } from "react-native";
 import { useSolar } from "../../../context/SolarContext";
 
@@ -38,7 +39,7 @@ export default function PanelScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={Keyboard.dismiss}>
       <Text style={styles.heading}>Parametry solárního panelu</Text>
       <Text style={styles.label}>Výška panelu (cm)</Text>
       <TextInput
@@ -70,7 +71,7 @@ export default function PanelScreen() {
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Uložit parametry</Text>
       </TouchableOpacity>
-    </View>
+    </Pressable>
   );
 }
 
