@@ -1,5 +1,4 @@
 import {
-  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -11,64 +10,54 @@ import { CalculationRecord, useSolar } from "../../../context/SolarContext";
 export default function HistoryScreen() {
   const { history, deleteFromHistory, clearHistory } = useSolar();
 
-  const handleDeleteOne = (id: string) => {
-    Alert.alert(
-      "Smazat záznam",
-      "Opravdu chceš tento výpočet odstranit z historie?",
-      [
-        { text: "Zrušit", style: "cancel" },
-        {
-          text: "Smazat",
-          style: "destructive",
-          onPress: () => deleteFromHistory(id),
-        },
-      ]
-    );
+  const handleDeleteOne = async (id: string) => {
+    await deleteFromHistory(id);
   };
 
-  const handleClearAll = () => {
-    Alert.alert(
-      "Vymazat historii",
-      "Opravdu chceš smazat úplně všechny uložené výpočty?",
-      [
-        { text: "Zrušit", style: "cancel" },
-        {
-          text: "Vymazat vše",
-          style: "destructive",
-          onPress: () => clearHistory(),
-        },
-      ]
-    );
+  const handleClearAll = async () => {
+    await clearHistory();
   };
 
-  const renderItem = ({ item }: { item: CalculationRecord }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
+  const renderItem = ({ item }: { item: CalculationRecord }) => {
+    const powerKw = Number((item.totalPowerWp / 1000).toFixed(2));
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.title}>{item.title || "Výpočet střechy"}</Text>
+          <TouchableOpacity
+            onPress={() => handleDeleteOne(item.id)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.deleteText}>Smazat</Text>
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.date}>{item.createdAt}</Text>
-        <TouchableOpacity onPress={() => handleDeleteOne(item.id)}>
-          <Text style={styles.deleteText}>Smazat</Text>
-        </TouchableOpacity>
-      </View>
 
-      <Text style={styles.mainResult}>
-        {item.panelCount} panelů • {item.totalPowerWp} kWp
-      </Text>
-      <Text style={styles.details}>
-        Střecha: {item.roofHeight} × {item.roofWidth} m
-      </Text>
-      <Text style={styles.details}>
-        Panel: {item.panelParams.heightCm} × {item.panelParams.widthCm} cm (
-        {item.panelParams.powerWp} Wp)
-      </Text>
-    </View>
-  );
+        <Text style={styles.mainResult}>
+          {item.panelCount} panelů • {powerKw} kWp
+        </Text>
+        <Text style={styles.details}>
+          Střecha: {item.roofHeight} × {item.roofWidth} m
+        </Text>
+        <Text style={styles.details}>
+          Panel: {item.panelParams.heightCm} × {item.panelParams.widthCm} cm (
+          {item.panelParams.powerWp} Wp)
+        </Text>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
         <Text style={styles.heading}>Historie výpočtů</Text>
         {history.length > 0 && (
-          <TouchableOpacity onPress={handleClearAll}>
+          <TouchableOpacity
+            onPress={handleClearAll}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Text style={styles.clearAllText}>Smazat vše</Text>
           </TouchableOpacity>
         )}
@@ -133,11 +122,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 4,
+    gap: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#0f172a",
+    flex: 1,
   },
   date: {
     fontSize: 12,
     color: "#64748b",
+    marginTop: 2,
+    marginBottom: 6,
   },
   deleteText: {
     fontSize: 13,

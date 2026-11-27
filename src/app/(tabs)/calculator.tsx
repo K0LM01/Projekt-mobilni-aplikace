@@ -1,6 +1,8 @@
 import { useState } from "react";
 import {
   Alert,
+  Keyboard,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +15,7 @@ import { CalculationRecord, useSolar } from "../../../context/SolarContext";
 export default function CalculatorScreen() {
   const { panelParams, addToHistory } = useSolar();
 
+  const [titleText, setTitleText] = useState("");
   const [roofHeightText, setRoofHeightText] = useState("6");
   const [roofWidthText, setRoofWidthText] = useState("10");
 
@@ -37,6 +40,7 @@ export default function CalculatorScreen() {
   const totalPowerKw = Number(
     ((panelCount * panelParams.powerWp) / 1000).toFixed(2),
   );
+  const totalPowerWp = panelCount * panelParams.powerWp;
 
   const handleSaveToHistory = async () => {
     if (!validInputs) {
@@ -47,65 +51,86 @@ export default function CalculatorScreen() {
       return;
     }
 
+    const trimmedTitle = titleText.trim();
+
     const record: CalculationRecord = {
       id: String(Date.now()),
+      title: trimmedTitle.length > 0 ? trimmedTitle : "Výpočet střechy",
       createdAt: new Date().toLocaleString("cs-CZ"),
       roofHeight: roofHeightM,
       roofWidth: roofWidthM,
       panelCount,
-      totalPowerWp: totalPowerKw,
+      totalPowerWp,
       panelParams: { ...panelParams },
     };
 
     await addToHistory(record);
-    Alert.alert("Uloženo do historie.", "Výpočet byl přidán do historie.");
+    Keyboard.dismiss();
+    Alert.alert(
+      "Uloženo do historie",
+      `Výpočet „${record.title}“ byl přidán do historie.`,
+    );
   };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.heading}>Výpočet pro střechu</Text>
+    <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.heading}>Výpočet pro střechu</Text>
 
-      <View style={styles.infoBox}>
-        <Text style={styles.infoTitle}>Aktuální panel (z Panel):</Text>
-        <Text style={styles.infoText}>
-          {panelParams.heightCm} * {panelParams.widthCm} cm |{" "}
-          {panelParams.powerWp} Wp
-        </Text>
-      </View>
+        <View style={styles.infoBox}>
+          <Text style={styles.infoTitle}>Aktuální panel (z Panel):</Text>
+          <Text style={styles.infoText}>
+            {panelParams.heightCm} × {panelParams.widthCm} cm |{" "}
+            {panelParams.powerWp} Wp
+          </Text>
+        </View>
 
-      <Text style={styles.label}>Výška střechy (m)</Text>
-      <TextInput
-        style={styles.input}
-        value={roofHeightText}
-        onChangeText={setRoofHeightText}
-        keyboardType="numeric"
-        placeholder="např. 6"
-      />
+        <Text style={styles.label}>Název výpočtu (nepovinné)</Text>
+        <TextInput
+          style={styles.input}
+          value={titleText}
+          onChangeText={setTitleText}
+          placeholder="např. Jižní střecha nebo Garáž"
+        />
 
-      <Text style={styles.label}>Šířka střechy (m)</Text>
-      <TextInput
-        style={styles.input}
-        value={roofWidthText}
-        onChangeText={setRoofWidthText}
-        keyboardType="numeric"
-        placeholder="např. 10"
-      />
+        <Text style={styles.label}>Výška střechy (m)</Text>
+        <TextInput
+          style={styles.input}
+          value={roofHeightText}
+          onChangeText={setRoofHeightText}
+          keyboardType="numeric"
+          placeholder="např. 6"
+        />
 
-      <View style={styles.resultBox}>
-        <Text style={styles.resultLabel}>Vejde se panelů:</Text>
-        <Text style={styles.resultValue}>
-          {panelCount} ks ({rows} řad * {cols} sloupců)
-        </Text>
+        <Text style={styles.label}>Šířka střechy (m)</Text>
+        <TextInput
+          style={styles.input}
+          value={roofWidthText}
+          onChangeText={setRoofWidthText}
+          keyboardType="numeric"
+          placeholder="např. 10"
+        />
 
-        <Text style={[styles.resultLabel, { marginTop: 12 }]}>
-          Celkový výkon:
-        </Text>
-        <Text style={styles.resultValue}>{totalPowerKw} kWp</Text>
-      </View>
+        <View style={styles.resultBox}>
+          <Text style={styles.resultLabel}>Vejde se panelů:</Text>
+          <Text style={styles.resultValue}>
+            {panelCount} ks ({rows} řad × {cols} sloupců)
+          </Text>
 
-      <TouchableOpacity style={styles.button} onPress={handleSaveToHistory}>
-        <Text style={styles.buttonText}>Uložit výpočet do historie</Text>
-      </TouchableOpacity>
-    </ScrollView>
+          <Text style={[styles.resultLabel, { marginTop: 12 }]}>
+            Celkový výkon:
+          </Text>
+          <Text style={styles.resultValue}>{totalPowerKw} kWp</Text>
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleSaveToHistory}>
+          <Text style={styles.buttonText}>Uložit výpočet do historie</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </Pressable>
   );
 }
 

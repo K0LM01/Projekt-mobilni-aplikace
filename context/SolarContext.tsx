@@ -16,6 +16,7 @@ export interface PanelParams {
 
 export interface CalculationRecord {
   id: string;
+  title?: string;
   createdAt: string;
   roofHeight: number;
   roofWidth: number;
