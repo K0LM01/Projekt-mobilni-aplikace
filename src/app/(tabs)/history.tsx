@@ -1,17 +1,60 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { CalculationRecord, useSolar } from "../../../context/SolarContext";
 
 export default function HistoryScreen() {
-  const { history } = useSolar();
+  const { history, deleteFromHistory, clearHistory } = useSolar();
+
+  const handleDeleteOne = (id: string) => {
+    Alert.alert(
+      "Smazat záznam",
+      "Opravdu chceš tento výpočet odstranit z historie?",
+      [
+        { text: "Zrušit", style: "cancel" },
+        {
+          text: "Smazat",
+          style: "destructive",
+          onPress: () => deleteFromHistory(id),
+        },
+      ]
+    );
+  };
+
+  const handleClearAll = () => {
+    Alert.alert(
+      "Vymazat historii",
+      "Opravdu chceš smazat úplně všechny uložené výpočty?",
+      [
+        { text: "Zrušit", style: "cancel" },
+        {
+          text: "Vymazat vše",
+          style: "destructive",
+          onPress: () => clearHistory(),
+        },
+      ]
+    );
+  };
 
   const renderItem = ({ item }: { item: CalculationRecord }) => (
     <View style={styles.card}>
-      <Text style={styles.date}>{item.createdAt}</Text>
+      <View style={styles.cardHeader}>
+        <Text style={styles.date}>{item.createdAt}</Text>
+        <TouchableOpacity onPress={() => handleDeleteOne(item.id)}>
+          <Text style={styles.deleteText}>Smazat</Text>
+        </TouchableOpacity>
+      </View>
+
       <Text style={styles.mainResult}>
-        {item.panelCount} panelů • {item.totalPowerKw} kWp
+        {item.panelCount} panelů • {item.totalPowerWp} kWp
       </Text>
       <Text style={styles.details}>
-        Střecha: {item.roofHeightM} × {item.roofWidthM} m
+        Střecha: {item.roofHeight} × {item.roofWidth} m
       </Text>
       <Text style={styles.details}>
         Panel: {item.panelParams.heightCm} × {item.panelParams.widthCm} cm (
@@ -22,7 +65,14 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Historie výpočtů</Text>
+      <View style={styles.topBar}>
+        <Text style={styles.heading}>Historie výpočtů</Text>
+        {history.length > 0 && (
+          <TouchableOpacity onPress={handleClearAll}>
+            <Text style={styles.clearAllText}>Smazat vše</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {history.length === 0 ? (
         <Text style={styles.emptyText}>
@@ -47,11 +97,21 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#f8fafc",
   },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   heading: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 16,
     color: "#0f172a",
+  },
+  clearAllText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#dc2626",
   },
   emptyText: {
     fontSize: 15,
@@ -69,10 +129,20 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 12,
   },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
   date: {
     fontSize: 12,
     color: "#64748b",
-    marginBottom: 4,
+  },
+  deleteText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#dc2626",
   },
   mainResult: {
     fontSize: 18,
